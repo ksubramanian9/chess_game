@@ -1,8 +1,13 @@
 # test_services.py
 
 import unittest
+import os
+import sys
 
 from copy import deepcopy
+
+# Ensure the repository root is on sys.path so ``chess_game`` can be imported
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 # Assuming your code is structured like:
 # from chess_game.domain.board import Board
@@ -11,10 +16,10 @@ from copy import deepcopy
 # from chess_game.domain.services import MovementService
 
 # For this example, we'll pretend they're imported as follows:
-from domain.board import Board
-from domain.game import Game
-from domain.piece import Piece, PieceType, Color
-from domain.services import MovementService
+from chess_game.domain.board import Board
+from chess_game.domain.game import Game
+from chess_game.domain.piece import Piece, PieceType, Color
+from chess_game.domain.services import MovementService
 
 class TestMovementService(unittest.TestCase):
     def setUp(self):
@@ -188,7 +193,7 @@ class TestMovementService(unittest.TestCase):
         self.board.grid[6][4] = Piece(Color.WHITE, PieceType.KING)
         # Now the rook is not attacking the king directly
         self.assertFalse(self.movement_service._is_in_check(self.board, Color.WHITE))
-        self.assertTrue(self.movement_service.is_checkmate(self.game))
+        self.assertFalse(self.movement_service.is_checkmate(self.game))
 
 
 if __name__ == '__main__':
