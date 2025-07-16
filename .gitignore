@@ -14,3 +14,4 @@ venv/
 
 # If using pytest, ignore test cache
 .pytest_cache/
+.coverage
