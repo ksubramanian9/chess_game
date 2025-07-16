@@ -3,18 +3,26 @@
 import unittest
 
 from copy import deepcopy
+from pathlib import Path
+import sys
 
-# Assuming your code is structured like:
-# from chess_game.domain.board import Board
-# from chess_game.domain.game import Game
-# from chess_game.domain.piece import Piece, PieceType, Color
-# from chess_game.domain.services import MovementService
+"""Ensure the chess_game package is importable when tests are run from the
+repository root.  Pytest does not add the parent directory to ``sys.path`` by
+default which makes ``import chess_game`` fail when the tests are executed
+directly.  Adding the repository's parent directory allows us to use fully
+qualified imports."""
 
-# For this example, we'll pretend they're imported as follows:
-from domain.board import Board
-from domain.game import Game
-from domain.piece import Piece, PieceType, Color
-from domain.services import MovementService
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PARENT_DIR = PROJECT_ROOT.parent
+for path in (PARENT_DIR, PROJECT_ROOT):
+    path_str = str(path)
+    if path_str not in sys.path:
+        sys.path.insert(0, path_str)
+
+from chess_game.domain.board import Board
+from chess_game.domain.game import Game
+from chess_game.domain.piece import Piece, PieceType, Color
+from chess_game.domain.services import MovementService
 
 class TestMovementService(unittest.TestCase):
     def setUp(self):
@@ -188,7 +196,8 @@ class TestMovementService(unittest.TestCase):
         self.board.grid[6][4] = Piece(Color.WHITE, PieceType.KING)
         # Now the rook is not attacking the king directly
         self.assertFalse(self.movement_service._is_in_check(self.board, Color.WHITE))
-        self.assertTrue(self.movement_service.is_checkmate(self.game))
+        # With the king out of check, the position should not be checkmate.
+        self.assertFalse(self.movement_service.is_checkmate(self.game))
 
 
 if __name__ == '__main__':
