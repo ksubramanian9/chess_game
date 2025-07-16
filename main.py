@@ -32,7 +32,7 @@ def main():
             try:
                 move_piece_uc.execute(game_id, selected_square, square)
             except Exception as ex:
-                print(ex)  # In a real game, show a message on screen
+                ui.show_message(str(ex))
             selected_square = None
 
         # If the game ended, you might break or show a winner screen, etc.
