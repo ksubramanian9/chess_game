@@ -8,7 +8,15 @@ class Game:
         # from_square/to_square might be something like (row, col)
         (fr, fc) = from_square
         (tr, tc) = to_square
+        piece = self.board.get_piece(fr, fc)
         self.board.move_piece(fr, fc, tr, tc)
+
+        # Handle castling: when king moves two squares horizontally,
+        # move the corresponding rook as well.
+        if piece and piece.piece_type == 'K' and abs(fc - tc) == 2:
+            rook_from_col = 0 if tc < fc else 7
+            rook_to_col = fc - 1 if tc < fc else fc + 1
+            self.board.move_piece(fr, rook_from_col, fr, rook_to_col)
         self._switch_player()
 
     def _switch_player(self):

@@ -147,6 +147,46 @@ class TestMovementService(unittest.TestCase):
         to_square_close = (6, 4)
         self.assertTrue(self.movement_service.is_valid_move(self.game, from_square, to_square_close))
 
+    def test_castling_kingside(self):
+        """
+        King and rook that haven't moved should be able to castle if path is clear.
+        """
+        self.board.place_piece(7, 4, Piece(Color.WHITE, PieceType.KING))
+        self.board.place_piece(7, 7, Piece(Color.WHITE, PieceType.ROOK))
+
+        from_square = (7, 4)
+        to_square = (7, 6)
+
+        self.assertTrue(self.movement_service.is_valid_move(self.game, from_square, to_square))
+
+    def test_castling_blocked(self):
+        """
+        Castling should fail if pieces block the path between king and rook.
+        """
+        self.board.place_piece(7, 4, Piece(Color.WHITE, PieceType.KING))
+        self.board.place_piece(7, 7, Piece(Color.WHITE, PieceType.ROOK))
+        # Knight blocking at f1 (7,5)
+        self.board.place_piece(7, 5, Piece(Color.WHITE, PieceType.KNIGHT))
+
+        self.assertFalse(self.movement_service.is_valid_move(self.game, (7, 4), (7, 6)))
+
+    def test_castling_kingside_black(self):
+        """Black king and rook should be able to castle kingside if path is clear."""
+        self.game.current_player = Color.BLACK
+        self.board.place_piece(0, 4, Piece(Color.BLACK, PieceType.KING))
+        self.board.place_piece(0, 7, Piece(Color.BLACK, PieceType.ROOK))
+
+        self.assertTrue(self.movement_service.is_valid_move(self.game, (0, 4), (0, 6)))
+
+    def test_castling_blocked_black(self):
+        """Black castling should fail if a piece blocks the path."""
+        self.game.current_player = Color.BLACK
+        self.board.place_piece(0, 4, Piece(Color.BLACK, PieceType.KING))
+        self.board.place_piece(0, 7, Piece(Color.BLACK, PieceType.ROOK))
+        self.board.place_piece(0, 5, Piece(Color.BLACK, PieceType.KNIGHT))
+
+        self.assertFalse(self.movement_service.is_valid_move(self.game, (0, 4), (0, 6)))
+
     def test_move_would_leave_king_in_check(self):
         """
         If moving a piece away exposes our king to an opposing rook, it should be invalid.
