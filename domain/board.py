@@ -13,3 +13,5 @@ class Board:
         piece = self.grid[from_row][from_col]
         self.grid[from_row][from_col] = None
         self.grid[to_row][to_col] = piece
+        if piece:
+            piece.has_moved = True

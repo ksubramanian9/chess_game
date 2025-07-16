@@ -49,6 +49,15 @@ class MovementService:
         if not self._can_move_piece(piece, from_square, to_square, board):
             return False
 
+        # Additional castling-specific checks
+        if piece.piece_type == PieceType.KING and abs(tc - fc) == 2:
+            # King cannot castle out of or through check
+            if self._is_in_check(board, piece.color):
+                return False
+            step = 1 if tc > fc else -1
+            if self._would_leave_king_in_check(game, from_square, (fr, fc + step)):
+                return False
+
         # Check if the move leaves our king in check
         if self._would_leave_king_in_check(game, from_square, to_square):
             return False
@@ -138,8 +147,19 @@ class MovementService:
         elif piece_type == PieceType.KING:
             # King can move 1 square in any direction
             if abs_row_diff <= 1 and abs_col_diff <= 1:
-                # (Ignoring castling for now)
                 return True
+
+            # Castling logic: king moves two squares horizontally and neither
+            # king nor rook have moved and the path is clear.
+            if abs_row_diff == 0 and abs_col_diff == 2 and not piece.has_moved:
+                rook_col = 0 if tc < fc else 7
+                rook = board.get_piece(fr, rook_col)
+                if rook and rook.piece_type == PieceType.ROOK and not rook.has_moved:
+                    step = -1 if tc < fc else 1
+                    for c in range(fc + step, rook_col, step):
+                        if board.get_piece(fr, c) is not None:
+                            return False
+                    return True
             return False
 
         return False
