@@ -1,5 +1,14 @@
-import pygame
+"""Pygame-based UI implementation."""
+
+import os
 import sys
+import warnings
+
+# Hide the pygame community message and silence pkg_resources deprecation
+os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+warnings.filterwarnings("ignore", category=UserWarning, module="pygame.pkgdata")
+
+import pygame
 from ports.ui_service import ChessUIService
 
 TILE_SIZE = 80
