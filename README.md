@@ -43,7 +43,7 @@ The goal of this project is to demonstrate how **DDD** and **Hexagonal Architect
 - **`domain/`**: Contains the core entities (`Board`, `Piece`, `Game`), value objects, and domain services (e.g. `MovementService`).
 - **`application/`**: Contains the **use cases** or **application services** (e.g. `StartGameUseCase`, `MovePieceUseCase`).
 - **`ports/`**: Contains definitions for **interfaces** (e.g. `GameRepository`, `ChessUIService`).
-- **`adapters/`**: Contains concrete **implementations** of those interfaces (e.g. `InMemoryGameRepository`, `PygameChessUI`).
+- **`adapters/`**: Contains concrete **implementations** of those interfaces (e.g. `FileGameRepository`, `PygameChessUI`).
 - **`main.py`**: Ties everything together and starts the game loop.
 
 ---
@@ -91,7 +91,7 @@ If everything is set up correctly, you’ll see an 8×8 board with Unicode piece
 - **MovePieceUseCase** : Validates a move (via MovementService) and, if valid, updates the Game. Also checks for check/checkmate.
 ### Ports and Adapters
 - **GameRepository (port)**: Defines how we load/save a Game.
-- **InMemoryGameRepository (adapter)**: Stores games in an in-memory dictionary, identified by UUIDs.
+- **FileGameRepository (adapter)**: Stores games on disk using pickle files.
 - **ChessUIService (port)**: Defines how we draw the board and handle user input.
 - **PygameChessUI (adapter)**: Uses Pygame to draw squares, pieces, and detect mouse clicks.
 ### Pygame UI
