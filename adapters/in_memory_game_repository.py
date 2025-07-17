@@ -16,3 +16,6 @@ class InMemoryGameRepository(GameRepository):
 
     def find_by_id(self, game_id):
         return self.storage.get(game_id, None)
+
+    def list_game_ids(self):
+        return list(self.storage.keys())
