@@ -45,9 +45,11 @@ class MovementService:
         if target_piece and target_piece.color == piece.color:
             return False
 
-        # Check if move is valid for that piece type
-        if not self._can_move_piece(piece, from_square, to_square, board):
-            return False
+        # Check if move is valid for that piece type or via en passant
+        if not self._can_move_piece(piece, from_square, to_square, board, game):
+            # Special case: en passant capture
+            if not self._is_en_passant(game, piece, from_square, to_square):
+                return False
 
         # Additional castling-specific checks
         if piece.piece_type == PieceType.KING and abs(tc - fc) == 2:
@@ -104,7 +106,7 @@ class MovementService:
     # -------------------------------------------------------------------------
     #                          INTERNAL / HELPER METHODS
     # -------------------------------------------------------------------------
-    def _can_move_piece(self, piece, from_square, to_square, board):
+    def _can_move_piece(self, piece, from_square, to_square, board, game=None):
         """
         Returns True if the piece can move from 'from_square' to 'to_square'
         ignoring check-scenarios. Strictly piece movement logic + path checking.
@@ -200,6 +202,38 @@ class MovementService:
 
         return False
 
+    def _is_en_passant(self, game, piece, from_square, to_square):
+        """Check if the pawn move is a valid en passant capture."""
+        if piece.piece_type != PieceType.PAWN:
+            return False
+        (fr, fc) = from_square
+        (tr, tc) = to_square
+        row_diff = tr - fr
+        col_diff = tc - fc
+
+        direction = -1 if piece.color == Color.WHITE else 1
+
+        # Must be moving diagonally one square to an empty square
+        if abs(col_diff) != 1 or row_diff != direction:
+            return False
+        if game.board.get_piece(tr, tc) is not None:
+            return False
+
+        last = getattr(game, "last_move", None)
+        if not last:
+            return False
+        last_piece, last_from, last_to = last
+        if last_piece.piece_type != PieceType.PAWN:
+            return False
+        if last_piece.color == piece.color:
+            return False
+        # Last move must be a two-square pawn advance ending adjacent to the capturing pawn
+        if abs(last_to[0] - last_from[0]) != 2:
+            return False
+        if last_to[0] != fr or last_to[1] != tc:
+            return False
+        return True
+
     def _is_path_clear(self, board, from_square, to_square):
         """
         Checks if all squares between 'from_square' and 'to_square' are empty 
@@ -273,7 +307,16 @@ class MovementService:
 
         piece = new_board.grid[fr][fc]
         new_board.grid[fr][fc] = None
+        # Handle en passant in simulation
+        if self._is_en_passant(game, piece, from_square, to_square):
+            capture_row = fr
+            capture_col = tc
+            new_board.grid[capture_row][capture_col] = None
+
         new_board.grid[tr][tc] = piece
+
+        # Record last move in the simulated game
+        new_game.last_move = (piece, from_square, to_square)
 
         # Switch player in the simulated game
         new_game._switch_player()  # or however your real code does it

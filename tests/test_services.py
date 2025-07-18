@@ -187,6 +187,27 @@ class TestMovementService(unittest.TestCase):
 
         self.assertFalse(self.movement_service.is_valid_move(self.game, (0, 4), (0, 6)))
 
+    def test_en_passant_white(self):
+        """White pawn should be able to capture en passant."""
+        white_pawn = Piece(Color.WHITE, PieceType.PAWN)
+        black_pawn = Piece(Color.BLACK, PieceType.PAWN)
+
+        self.board.place_piece(3, 5, white_pawn)
+        self.board.place_piece(3, 4, black_pawn)
+        self.game.current_player = Color.WHITE
+        # Black pawn just moved two squares from (1,4) to (3,4)
+        self.game.last_move = (black_pawn, (1, 4), (3, 4))
+
+        from_square = (3, 5)
+        to_square = (2, 4)
+
+        self.assertTrue(self.movement_service.is_valid_move(self.game, from_square, to_square))
+
+        # Execute and verify board state
+        self.game.move_piece(from_square, to_square)
+        self.assertIsNone(self.board.get_piece(3, 4))
+        self.assertEqual(self.board.get_piece(2, 4), white_pawn)
+
     def test_move_would_leave_king_in_check(self):
         """
         If moving a piece away exposes our king to an opposing rook, it should be invalid.
